@@ -21,7 +21,7 @@ example_data = pd.DataFrame(
     ]
 )
 
-theme.superhero()
+# theme.superhero()
 
 ui.h1("Live Port Monitoring")
 
@@ -89,6 +89,7 @@ async def fetch_lnms_data():
     base_url = f"{input.lnms_inst()}/api/v0"
     api_header = {"X-Auth-Token": input.lnms_key()}
     async with aiohttp.ClientSession(headers=api_header) as session:
+        print("fetch port data...")
         ports_resp = await session.get(
             f"{base_url}/ports",
             params={
@@ -155,6 +156,7 @@ async def fetch_device_data(device_ids: list, session: aiohttp.ClientSession, ba
     with ui.Progress(min=0, max=len(device_ids)) as p:
         p.set(message="Fetching device data", detail="This may take a while")
         for pos, device_id in enumerate(device_ids):
+            print(f"fetch data for device {device_id}...")
             p.set(pos)
             device_resp = await session.get(f"{base_url}/devices/{device_id}")
             if device_resp.status != 200:
