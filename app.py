@@ -1,6 +1,7 @@
 import aiohttp
 import asyncio
 import csv
+import datetime
 import io
 import json
 import pandas as pd
@@ -62,7 +63,12 @@ async def show_dl_maybe():
 
     dl_button = s_ui.download_button("export_button", "Export data")
 
-    @s_render.download(filename="export.csv")
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+
+    @s_render.download(
+            filename=f"{timestamp} Port Monitoring Data.csv",
+            media_type="text/csv"
+    )
     def export_button():
         with io.StringIO() as buf:
             keys = port_data[0].keys()
