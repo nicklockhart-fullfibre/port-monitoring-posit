@@ -1,9 +1,11 @@
 import aiohttp
 import asyncio
+import csv
+import io
 import json
 import pandas as pd
 
-from shiny import render, reactive, req
+from shiny import render, reactive, req, types
 from shiny.express import input, output, ui
 
 from shiny import ui as s_ui
@@ -47,11 +49,31 @@ async def generate_dev_accordion():
     return render.DataGrid(
         pd.DataFrame(port_data),
         width="100%",
-        height="80vh",
+        height="70vh",
         summary="Viewing ports {start} through {end} of {total}",
         filters=True,
         selection_mode="none"
     )
+
+@render.ui
+async def show_dl_maybe():
+    await req(fetch_lnms_data())
+    port_data = await fetch_lnms_data() # type: ignore
+
+    dl_button = s_ui.download_button("export_button", "Export data")
+
+    @s_render.download(filename="export.csv")
+    def export_button():
+        with io.StringIO() as buf:
+            keys = port_data[0].keys()
+            dw = csv.DictWriter(buf, keys)
+            dw.writeheader()
+            for row in port_data:
+                dw.writerow(row)
+            yield buf.getvalue()
+
+    return dl_button
+
 
 @reactive.effect
 @reactive.event(input.auth)
